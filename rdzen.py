@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Apr 26 12:57:11 2018
+
 @author: sosene
 """
 #Przepisac na wersje kolumnowo-macierzowa...
@@ -23,6 +25,9 @@ class Entity:
     pz = 0.
     v = 0.
     alpha = 0.
+    alive = 1
+    
+    energy = 100.
     
     # parameters
     aMax = 2.
@@ -31,24 +36,31 @@ class Entity:
     rangeSegments = 5
     rotSegments = 11 # better to have odd number probably
     halfBeta = 30
+    mass = 2.
     
     # init function
-    def __init__(self,rx,rz,alpha,kind):
+    def __init__(self,rx,rz,alpha,kind,energy):
         #print('Hej')
         self.px = rx
         self.pz = rz
         self.alpha = alpha
         self.kind = kind
+        self.energy = energy
         
     def move(self, dt):
         self.px = (self.px + self.v * np.cos(self.alpha * 2*np.pi/360) * dt) % worldSize['x']
         self.pz = (self.pz + self.v * np.sin(self.alpha * 2*np.pi/360) * dt) % worldSize['z']
+        self.energy = self.energy - dt*self.mass*self.v**2/2
     
     def accelerate(self, aFrac):
         self.v = self.v + aFrac*self.aMax
         
     def rotate(self, rotFrac):
         self.alpha = (self.alpha + rotFrac * self.rotMax/(1+self.v)) % 360
+        
+    def checkState(self):
+        if (self.energy < 0):
+            self.alive = 0
     
 entityList = []
 
@@ -58,14 +70,15 @@ for i in range(entityNumber):
     rz = random.random()*worldSize['z']
     alpha = random.random()*360
     kind = int(random.random()*3)
-    entityList.append(Entity(rx,rz,alpha,kind))
+    energy = random.random()*10
+    entityList.append(Entity(rx,rz,alpha,kind,energy))
     
 # accelerate entities
 for i in range(len(entityList)):
     entityList[i].accelerate(random.random())   
    
 
-for j in range(1):
+for j in range(1000):
     # move entities
     for i in range(len(entityList)):
         entityList[i].move(1)
@@ -77,17 +90,20 @@ for j in range(1):
 
     pxList = []
     pzList = []
-    vList = []
+    aliveList = []
+    energyList = []
     for i in range(len(entityList)):
         pxList.append(entityList[i].px)
         pzList.append(entityList[i].pz)
-        vList.append(entityList[i].v)
+        aliveList.append(entityList[i].alive)
+        energyList.append(entityList[i].energy)
     
     df = pd.DataFrame(
         {
             'px': pxList,
             'pz': pzList,
-            'v': vList
+            'alive': aliveList,
+            'energy': energyList
         })
 
 
@@ -98,7 +114,7 @@ for j in range(1):
     sb.plt.ylim(0,100)
 
     points = plt.scatter(df["px"], df["pz"],
-                         c=df["v"], s=20, cmap="Spectral") #set style options
+                         c=df["alive"], cmap="Spectral", s=df["energy"]) #set style options
     points.figure.set_size_inches(10, 10)           
     points.figure.savefig("oaa_1_"+str(j)+".png")
     plt.clf()
