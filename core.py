@@ -2,7 +2,7 @@
 """
 Created on Thu Apr 26 12:57:11 2018
 
-@author: A84605914
+@author: sosene
 """
 #Przepisac na wersje kolumnowo-macierzowa...
 import random
