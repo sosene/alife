@@ -27,7 +27,7 @@ class Entity:
     alpha = 0.
     alive = 1
     
-    energy = 100.
+    energy = 50.
     
     # parameters
     aMax = 2.
@@ -36,7 +36,7 @@ class Entity:
     rangeSegments = 5
     rotSegments = 11 # better to have odd number probably
     halfBeta = 30
-    mass = 2.
+    mass = 0.2
     
     # init function
     def __init__(self,rx,rz,alpha,kind,energy):
@@ -70,7 +70,7 @@ for i in range(entityNumber):
     rz = random.random()*worldSize['z']
     alpha = random.random()*360
     kind = int(random.random()*3)
-    energy = random.random()*10
+    energy = random.random()*50+100
     entityList.append(Entity(rx,rz,alpha,kind,energy))
     
 # accelerate entities
@@ -90,19 +90,19 @@ for j in range(1000):
 
     pxList = []
     pzList = []
-    aliveList = []
+    kindList = []
     energyList = []
     for i in range(len(entityList)):
         pxList.append(entityList[i].px)
         pzList.append(entityList[i].pz)
-        aliveList.append(entityList[i].alive)
+        kindList.append(entityList[i].kind)
         energyList.append(entityList[i].energy)
     
     df = pd.DataFrame(
         {
             'px': pxList,
             'pz': pzList,
-            'alive': aliveList,
+            'kind': kindList,
             'energy': energyList
         })
 
@@ -114,7 +114,7 @@ for j in range(1000):
     sb.plt.ylim(0,100)
 
     points = plt.scatter(df["px"], df["pz"],
-                         c=df["alive"], cmap="Spectral", s=df["energy"]) #set style options
+                         c=df["kind"], cmap="Spectral", s=df["energy"]) #set style options
     points.figure.set_size_inches(10, 10)           
     points.figure.savefig("oaa_1_"+str(j)+".png")
     plt.clf()
